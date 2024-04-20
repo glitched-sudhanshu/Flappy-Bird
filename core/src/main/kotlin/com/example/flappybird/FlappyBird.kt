@@ -22,7 +22,7 @@ class FlappyBird : ApplicationAdapter() {
     private var birdY = 0f
     private var velocity = 0f
     private lateinit var playerHitBox: Circle
-    private var gameState = 0
+    private var gameState = GameState.Start
     private var gravity = 1f
     private lateinit var topHurdle: Texture
     private lateinit var bottomHurdle: Texture
@@ -74,6 +74,17 @@ class FlappyBird : ApplicationAdapter() {
         }
     }
 
+    private fun resetGameStates() {
+        hurdleX.clear()
+        tubeOffset.clear()
+        topHurdleBox.clear()
+        bottomHurdleBox.clear()
+        score = 0
+        hurdleX
+        scoringHurdle = 0
+        velocity = 0f
+    }
+
     override fun render() {
         batch?.begin()
         batch?.draw(
@@ -83,7 +94,7 @@ class FlappyBird : ApplicationAdapter() {
             Gdx.graphics.width.toFloat(),
             Gdx.graphics.height.toFloat(),
         )
-        if (gameState == 1) {
+        if (gameState == GameState.Running) {
             if (hurdleX[scoringHurdle] < Gdx.graphics.width / 2) {
                 score++
                 if (scoringHurdle < noOfHurdles - 1) {
@@ -141,29 +152,22 @@ class FlappyBird : ApplicationAdapter() {
                 birdY =
                     (birdY - velocity).coerceAtMost(Gdx.graphics.height.toFloat() - birds[0].height)
             } else {
-                gameState = 2
+                gameState = GameState.GameOver
             }
-        } else if (gameState == 0) {
+        } else if (gameState == GameState.Start) {
             if (Gdx.input.justTouched()) {
-                gameState = 1
+                gameState = GameState.Running
             }
-        } else if (gameState == 2) {
+        } else if (gameState == GameState.GameOver) {
             batch?.draw(
                 gameOverTexture,
                 Gdx.graphics.width / 2f - gameOverTexture.width / 2,
                 Gdx.graphics.height / 2f - gameOverTexture.height / 2,
             )
             if (Gdx.input.justTouched()) {
-                gameState = 1
-                hurdleX.clear()
-                tubeOffset.clear()
-                topHurdleBox.clear()
-                bottomHurdleBox.clear()
+                gameState = GameState.Running
+                resetGameStates()
                 startGame()
-                score = 0
-                hurdleX
-                scoringHurdle = 0
-                velocity = 0f
             }
         }
         flapTimer += Gdx.graphics.deltaTime
@@ -186,7 +190,7 @@ class FlappyBird : ApplicationAdapter() {
                     bottomHurdleBox[i],
                 )
             ) {
-                gameState = 2
+                gameState = GameState.GameOver
             }
         }
         batch?.end()
