@@ -2,9 +2,10 @@ package com.example.flappybird
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Rectangle
@@ -21,7 +22,8 @@ class FlappyBird : ApplicationAdapter() {
     private var birdY = 0f
     private var velocity = 0f
     private lateinit var playerHitBox: Circle
-    private lateinit var shapeRenderer: ShapeRenderer
+
+//    private lateinit var shapeRenderer: ShapeRenderer
     private var gameState = 0
     private var gravity = 2f
     private var topHurdle: Texture? = null
@@ -36,6 +38,9 @@ class FlappyBird : ApplicationAdapter() {
     private val bottomHurdleBox = mutableListOf<Rectangle>()
     private var noOfHurdles = 4
     private var distanceBetweenHurdles = 100f
+    private var score: Int = 0
+    private var scoringHurdle: Int = 0
+    private lateinit var font: BitmapFont
 
     override fun create() {
         batch = SpriteBatch()
@@ -47,7 +52,11 @@ class FlappyBird : ApplicationAdapter() {
         hurdleGap = max(500f, birds[0].height.toFloat() + 20f)
         birdY = (Gdx.graphics.height / 2 - birds[0].height / 2).toFloat()
         playerHitBox = Circle()
-        shapeRenderer = ShapeRenderer()
+        font = BitmapFont()
+        font.setColor(Color.WHITE)
+        font.data.scale(12f)
+
+//        shapeRenderer = ShapeRenderer()
 //        maximumOffset = Gdx.graphics.height / 2 - hurdleGap / 2 - 100
         distanceBetweenHurdles = Gdx.graphics.width * 3 / 4f
 
@@ -76,6 +85,14 @@ class FlappyBird : ApplicationAdapter() {
             Gdx.graphics.height.toFloat(),
         )
         if (gameState != 0) {
+            if (hurdleX[scoringHurdle] < Gdx.graphics.width / 2) {
+                score++
+                if (scoringHurdle < noOfHurdles - 1) {
+                    scoringHurdle++
+                } else {
+                    scoringHurdle = 0
+                }
+            }
             if (Gdx.input.justTouched()) {
                 velocity = -30f
             }
@@ -143,6 +160,7 @@ class FlappyBird : ApplicationAdapter() {
         )
 //        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         playerHitBox.set(Gdx.graphics.width / 2f, birdY + birds[0].height / 2, birds[0].width / 2f)
+        font.draw(batch, score.toString(), 100f, 200f)
 //        shapeRenderer.circle(playerHitBox.x, playerHitBox.y, playerHitBox.radius)
         for (i in 0 until noOfHurdles) {
 //            shapeRenderer.rect(
@@ -164,7 +182,7 @@ class FlappyBird : ApplicationAdapter() {
                 gameState = 0
             }
         }
-        shapeRenderer.end()
+//        shapeRenderer.end()
         batch?.end()
     }
 }
