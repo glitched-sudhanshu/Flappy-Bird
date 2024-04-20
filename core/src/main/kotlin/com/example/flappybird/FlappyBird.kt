@@ -4,6 +4,10 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Circle
+import com.badlogic.gdx.math.Intersector
+import com.badlogic.gdx.math.Rectangle
 import java.lang.Float.max
 
 class FlappyBird : ApplicationAdapter() {
@@ -16,6 +20,8 @@ class FlappyBird : ApplicationAdapter() {
     private val flapDelay = 0.1f
     private var birdY = 0f
     private var velocity = 0f
+    private lateinit var playerHitBox: Circle
+    private lateinit var shapeRenderer: ShapeRenderer
     private var gameState = 0
     private var gravity = 2f
     private var topHurdle: Texture? = null
@@ -24,8 +30,10 @@ class FlappyBird : ApplicationAdapter() {
     private var maximumOffset = 100f
     private var randomGenerator = java.util.Random(1000)
     private var tubeVelocity = 4f
-    private var hurdleX = mutableListOf<Float>()
-    private var tubeOffset = mutableListOf<Float>()
+    private val hurdleX = mutableListOf<Float>()
+    private val tubeOffset = mutableListOf<Float>()
+    private val topHurdleBox = mutableListOf<Rectangle>()
+    private val bottomHurdleBox = mutableListOf<Rectangle>()
     private var noOfHurdles = 4
     private var distanceBetweenHurdles = 100f
 
@@ -38,8 +46,11 @@ class FlappyBird : ApplicationAdapter() {
         birds.add(Texture("flappybirddown.png"))
         hurdleGap = max(500f, birds[0].height.toFloat() + 20f)
         birdY = (Gdx.graphics.height / 2 - birds[0].height / 2).toFloat()
+        playerHitBox = Circle()
+        shapeRenderer = ShapeRenderer()
 //        maximumOffset = Gdx.graphics.height / 2 - hurdleGap / 2 - 100
         distanceBetweenHurdles = Gdx.graphics.width * 3 / 4f
+
         for (i in 0 until noOfHurdles) {
             tubeOffset.add((randomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.height - hurdleGap - 200))
             hurdleX.add(
@@ -50,6 +61,8 @@ class FlappyBird : ApplicationAdapter() {
                     ) / 2
                 ).toFloat() + Gdx.graphics.width + i * distanceBetweenHurdles,
             )
+            topHurdleBox.add(Rectangle())
+            bottomHurdleBox.add(Rectangle())
         }
     }
 
@@ -94,6 +107,23 @@ class FlappyBird : ApplicationAdapter() {
                             ?: 1
                     ) + tubeOffset[i],
                 )
+                topHurdleBox[i] =
+                    Rectangle(
+                        hurdleX[i],
+                        Gdx.graphics.height / 2 + hurdleGap / 2 + tubeOffset[i],
+                        topHurdle?.width?.toFloat() ?: 1f,
+                        topHurdle?.height?.toFloat() ?: 1f,
+                    )
+                bottomHurdleBox[i] =
+                    Rectangle(
+                        hurdleX[i],
+                        Gdx.graphics.height / 2 - hurdleGap / 2 - (
+                            bottomHurdle?.height
+                                ?: 1
+                        ) + tubeOffset[i],
+                        topHurdle?.width?.toFloat() ?: 1f,
+                        topHurdle?.height?.toFloat() ?: 1f,
+                    )
             }
         } else {
             if (Gdx.input.justTouched()) {
@@ -111,6 +141,30 @@ class FlappyBird : ApplicationAdapter() {
             ((Gdx.graphics.width / 2) - (birds[flapState].width.div(2))).toFloat(),
             birdY,
         )
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        playerHitBox.set(Gdx.graphics.width / 2f, birdY + birds[0].height / 2, birds[0].width / 2f)
+//        shapeRenderer.circle(playerHitBox.x, playerHitBox.y, playerHitBox.radius)
+        for (i in 0 until noOfHurdles) {
+//            shapeRenderer.rect(
+//                hurdleX[i],
+//                Gdx.graphics.height / 2 + hurdleGap / 2 + tubeOffset[i],
+//                topHurdle?.width?.toFloat() ?: 1f,
+//                topHurdle?.height?.toFloat() ?: 1f,
+//            )
+//            shapeRenderer.rect(
+//                hurdleX[i],
+//                Gdx.graphics.height / 2 - hurdleGap / 2 - (
+//                    bottomHurdle?.height
+//                        ?: 1
+//                ) + tubeOffset[i],
+//                topHurdle?.width?.toFloat() ?: 1f,
+//                topHurdle?.height?.toFloat() ?: 1f,
+//            )
+            if (Intersector.overlaps(playerHitBox, topHurdleBox[i]) || Intersector.overlaps(playerHitBox, bottomHurdleBox[i])) {
+                gameState = 0
+            }
+        }
+        shapeRenderer.end()
         batch?.end()
     }
 }
