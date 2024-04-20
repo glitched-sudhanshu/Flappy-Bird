@@ -51,7 +51,7 @@ class FlappyBird : ApplicationAdapter() {
         hurdleGap = max(500f, birds[0].height.toFloat() + 20f)
         playerHitBox = Circle()
         font = BitmapFont()
-        font.setColor(Color.WHITE)
+        font.color = Color.WHITE
         font.data.scale(12f)
         distanceBetweenHurdles = Gdx.graphics.width * 3 / 4f
         startGame()
@@ -62,12 +62,7 @@ class FlappyBird : ApplicationAdapter() {
         for (i in 0 until noOfHurdles) {
             tubeOffset.add((randomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.height - hurdleGap - 200))
             hurdleX.add(
-                (
-                    Gdx.graphics.width / 2 - (
-                        topHurdle?.width
-                            ?: 1
-                    ) / 2
-                ).toFloat() + Gdx.graphics.width + i * distanceBetweenHurdles,
+                (Gdx.graphics.width / 2 - topHurdle.width / 2).toFloat() + Gdx.graphics.width + i * distanceBetweenHurdles,
             )
             topHurdleBox.add(Rectangle())
             bottomHurdleBox.add(Rectangle())
@@ -108,7 +103,7 @@ class FlappyBird : ApplicationAdapter() {
             }
 
             for (i in 0 until noOfHurdles) {
-                if (hurdleX[i] < -(topHurdle?.width ?: 1)) {
+                if (hurdleX[i] < -topHurdle.width) {
                     hurdleX[i] += noOfHurdles * distanceBetweenHurdles
                     tubeOffset[i] =
                         (randomGenerator.nextFloat() - 0.5f) * (Gdx.graphics.height - hurdleGap - 200)
@@ -123,27 +118,23 @@ class FlappyBird : ApplicationAdapter() {
                 batch?.draw(
                     bottomHurdle,
                     hurdleX[i],
-                    Gdx.graphics.height / 2 - hurdleGap / 2 - (
-                        bottomHurdle?.height
-                            ?: 1
-                    ) + tubeOffset[i],
+                    Gdx.graphics.height / 2 - hurdleGap / 2 -
+                        bottomHurdle.height + tubeOffset[i],
                 )
                 topHurdleBox[i] =
                     Rectangle(
                         hurdleX[i],
                         Gdx.graphics.height / 2 + hurdleGap / 2 + tubeOffset[i],
-                        topHurdle?.width?.toFloat() ?: 1f,
-                        topHurdle?.height?.toFloat() ?: 1f,
+                        topHurdle.width.toFloat(),
+                        topHurdle.height.toFloat(),
                     )
                 bottomHurdleBox[i] =
                     Rectangle(
                         hurdleX[i],
-                        Gdx.graphics.height / 2 - hurdleGap / 2 - (
-                            bottomHurdle?.height
-                                ?: 1
-                        ) + tubeOffset[i],
-                        topHurdle?.width?.toFloat() ?: 1f,
-                        topHurdle?.height?.toFloat() ?: 1f,
+                        Gdx.graphics.height / 2 - hurdleGap / 2 -
+                            bottomHurdle.height + tubeOffset[i],
+                        topHurdle.width.toFloat(),
+                        topHurdle.height.toFloat(),
                     )
             }
             if (birdY > 0) {
